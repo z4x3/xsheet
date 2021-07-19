@@ -11,10 +11,10 @@ export default class Datepicker {
   }
 
   setValue(date) {
-    // console.log(':::::::', date, typeof date, date instanceof string);
+    // logger(':::::::', date, typeof date, date instanceof string);
     const { calendar } = this;
     if (typeof date === 'string') {
-      // console.log(/^\d{4}-\d{1,2}-\d{1,2}$/.test(date));
+      // logger(/^\d{4}-\d{1,2}-\d{1,2}$/.test(date));
       if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(date)) {
         calendar.setValue(new Date(date.replace(new RegExp('-', 'g'), '/')));
       }

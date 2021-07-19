@@ -118,7 +118,7 @@ export default class Toolbar {
     this.change = () => {};
     this.widthFn = widthFn;
     const style = data.defaultStyle();
-    // console.log('data:', data);
+    // logger('data:', data);
     this.ddFormat = new DropdownFormat();
     this.ddFont = new DropdownFont();
     this.ddFormula = new DropdownFormula();
@@ -133,7 +133,7 @@ export default class Toolbar {
       this.undoEl = buildButtonWithIcon(`${t('toolbar.undo')} (Ctrl+Z)`, 'undo', () => this.change('undo')),
       this.redoEl = buildButtonWithIcon(`${t('toolbar.undo')} (Ctrl+Y)`, 'redo', () => this.change('redo')),
       // this.printEl = buildButtonWithIcon('Print (Ctrl+P)', 'print', () => this.change('print')),
-      this.paintformatEl = buildButtonWithIcon(`${t('toolbar.paintformat')}`, 'paintformat', () => toggleChange.call(this, 'paintformat')),
+      // this.paintformatEl = buildButtonWithIcon(`${t('toolbar.paintformat')}`, 'paintformat', () => toggleChange.call(this, 'paintformat')),
       this.clearformatEl = buildButtonWithIcon(`${t('toolbar.clearformat')}`, 'clearformat', () => this.change('clearformat')),
       buildDivider(),
       buildButton(`${t('toolbar.format')}`).child(this.ddFormat.el),
@@ -194,14 +194,14 @@ export default class Toolbar {
     const { data } = this;
     const style = data.getSelectedCellStyle();
     const cell = data.getSelectedCell();
-    // console.log('canUndo:', data.canUndo());
+    // logger('canUndo:', data.canUndo());
     this.undoEl.disabled(!data.canUndo());
     this.redoEl.disabled(!data.canRedo());
     this.mergeEl.active(data.canUnmerge())
       .disabled(!data.selector.multiple());
     this.autofilterEl.active(!data.canAutofilter());
     // this.mergeEl.disabled();
-    // console.log('selectedCell:', style, cell);
+    // logger('selectedCell:', style, cell);
     const { font } = style;
     this.ddFont.setTitle(font.name);
     this.ddFontSize.setTitle(font.size);
@@ -214,7 +214,7 @@ export default class Toolbar {
     this.ddAlign.setTitle(style.align);
     this.ddVAlign.setTitle(style.valign);
     this.textwrapEl.active(style.textwrap);
-    // console.log('freeze is Active:', data.freezeIsActive());
+    // logger('freeze is Active:', data.freezeIsActive());
     this.freezeEl.active(data.freezeIsActive());
     if (cell) {
       if (cell.format) {

@@ -1,7 +1,7 @@
 import { CellRange } from './cell_range';
 
 class Merges {
-  constructor(d = []) {
+  constructor(d = []) { // [cellRange,...]
     this._ = d;
   }
 
@@ -14,6 +14,7 @@ class Merges {
   }
 
   getFirstIncludes(ri, ci) {
+    logger('getFirstIncludes this._ >>>>>>',this._)
     for (let i = 0; i < this._.length; i += 1) {
       const it = this._[i];
       if (it.includes(ri, ci)) {
@@ -27,27 +28,36 @@ class Merges {
     return new Merges(this._.filter(it => it.intersects(cellRange)));
   }
 
+  // 是否有交叉
   intersects(cellRange) {
     for (let i = 0; i < this._.length; i += 1) {
       const it = this._[i];
       if (it.intersects(cellRange)) {
-        // console.log('intersects');
+        // logger('intersects');
         return true;
       }
     }
     return false;
   }
 
-  union(cellRange) {
-    let cr = cellRange;
-    this._.forEach((it) => {
-      if (it.intersects(cr)) {
-        cr = it.union(cr);
+  // 遍历已有的合并区域this._ 和现有的选取有交叉的进行计算
+  union(selectorCr) {
+    let cr = selectorCr;
+    logger('union >>>> this._', this._)
+
+    logger('union >>>> origin selectorCr', `${cr}`)
+    this._.forEach((cellRangeItem, index) => {
+      logger('union >>>> origin cellRangeItem', `${cellRangeItem}`)
+      // 和现有的所有选取有交叉的 进行合并计算 返回新的选区
+      if (cellRangeItem.intersects(cr)) {
+        cr = cellRangeItem.union(cr);
+        logger('union >>>> new_cellrange',`${index}-${cr}`)
       }
     });
     return cr;
   }
 
+  // cr cellrange
   add(cr) {
     this.deleteWithin(cr);
     this._.push(cr);

@@ -139,7 +139,7 @@ class Draw {
   }
 
   resize(width, height) {
-    // console.log('dpr:', dpr);
+    // logger('dpr:', dpr);
     this.el.style.width = `${width}px`;
     this.el.style.height = `${height}px`;
     this.el.width = npx(width);
@@ -273,7 +273,7 @@ class Draw {
     const { ctx } = this;
     ctx.lineWidth = thinLineWidth;
     ctx.strokeStyle = color;
-    // console.log('style:', style);
+    // logger('style:', style);
     if (style === 'medium') {
       ctx.lineWidth = npx(2) - 0.5;
     } else if (style === 'thick') {
@@ -312,7 +312,7 @@ class Draw {
     } = box;
     if (borderTop) {
       this.border(...borderTop);
-      // console.log('box.topxys:', box.topxys());
+      // logger('box.topxys:', box.topxys());
       this.line(...box.topxys());
     }
     if (borderRight) {

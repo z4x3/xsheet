@@ -3,7 +3,7 @@ import './_.prototypes';
 const alphabets = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
 /** index number 2 letters
- * @example stringAt(26) ==> 'AA'
+ * @example stringAt(26) ==> 'AA' stringAt(27) ==> 'AB'
  * @date 2019-10-10
  * @export
  * @param {number} index
@@ -17,7 +17,7 @@ export function stringAt(index) {
     cindex -= 1;
     str += alphabets[parseInt(cindex, 10) % alphabets.length];
   }
-  const last = index % alphabets.length;
+  const last = index % alphabets.length; 
   str += alphabets[last];
   return str;
 }

@@ -13,7 +13,7 @@ export default message;
 module.exports = require('babel-loader').custom(babel => {
   return {
     result(result, { options }) {
-      // console.log('options:', options);
+      // logger('options:', options);
       const lang = path.basename(options.filename, '.js');
       result.code = getLocaleCode(lang, result.code);
       return result;

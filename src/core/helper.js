@@ -4,10 +4,11 @@ function cloneDeep(obj) {
 }
 
 const mergeDeep = (object = {}, ...sources) => {
+  // logger('mergeDeep sources',sources)
   sources.forEach((source) => {
-    Object.keys(source).forEach((key) => {
+    Object.keys(source).forEach((key) => {  // fix!!
       const v = source[key];
-      // console.log('k:', key, ', v:', source[key], typeof v, v instanceof Object);
+      // logger('k:', key, ', v:', source[key], typeof v, v instanceof Object);
       if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
         object[key] = v;
       } else if (typeof v !== 'function' && !Array.isArray(v) && v instanceof Object) {
@@ -18,7 +19,7 @@ const mergeDeep = (object = {}, ...sources) => {
       }
     });
   });
-  // console.log('::', object);
+  // logger('::', object);
   return object;
 };
 

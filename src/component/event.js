@@ -18,7 +18,7 @@ export function unbindClickoutside(el) {
 export function bindClickoutside(el, cb) {
   el.xclickoutside = (evt) => {
     // ignore double click
-    // console.log('evt:', evt);
+    // logger('evt:', evt);
     if (evt.detail === 2 || el.contains(evt.target)) return;
     if (cb) cb(el);
     else {
@@ -32,7 +32,7 @@ export function mouseMoveUp(target, movefunc, upfunc) {
   bind(target, 'mousemove', movefunc);
   const t = target;
   t.xEvtUp = (evt) => {
-    // console.log('mouseup>>>');
+    // logger('mouseup>>>');
     unbind(target, 'mousemove', movefunc);
     unbind(target, 'mouseup', target.xEvtUp);
     upfunc(evt);
@@ -42,7 +42,7 @@ export function mouseMoveUp(target, movefunc, upfunc) {
 
 function calTouchDirection(spanx, spany, evt, cb) {
   let direction = '';
-  // console.log('spanx:', spanx, ', spany:', spany);
+  // logger('spanx:', spanx, ', spany:', spany);
   if (Math.abs(spanx) > Math.abs(spany)) {
     // horizontal
     direction = spanx > 0 ? 'right' : 'left';
@@ -68,7 +68,7 @@ export function bindTouch(target, { move, end }) {
     const spanx = pageX - startx;
     const spany = pageY - starty;
     if (Math.abs(spanx) > 10 || Math.abs(spany) > 10) {
-      // console.log('spanx:', spanx, ', spany:', spany);
+      // logger('spanx:', spanx, ', spany:', spany);
       calTouchDirection(spanx, spany, evt, move);
       startx = pageX;
       starty = pageY;
@@ -88,21 +88,20 @@ export function bindTouch(target, { move, end }) {
 export function createEventEmitter() {
   const listeners = new Map();
 
+   // 绑定事件
   function on(eventName, callback) {
+    // 获取当前事件的事件监听器，如果是数组说明已存在事件绑定，向其中追加事件监听器
     const push = () => {
       const currentListener = listeners.get(eventName);
-      return (Array.isArray(currentListener)
-          && currentListener.push(callback))
-          || false;
+      return (Array.isArray(currentListener) && currentListener.push(callback)) || false;
     };
-
+    // 向listeners map中注册事件名和事件监听器，注意事件是数据类型
     const create = () => listeners.set(eventName, [].concat(callback));
-
-    return (listeners.has(eventName)
-        && push())
-        || create();
+    //  区分新建事件绑定和事件追加绑定
+    return (listeners.has(eventName) && push()) || create();
   }
 
+  // 触发事件
   function fire(eventName, args) {
     const exec = () => {
       const currentListener = listeners.get(eventName);
@@ -113,6 +112,7 @@ export function createEventEmitter() {
         && exec();
   }
 
+  // 移除指定事件
   function removeListener(eventName, callback) {
     const remove = () => {
       const currentListener = listeners.get(eventName);
@@ -127,6 +127,7 @@ export function createEventEmitter() {
         && remove();
   }
 
+  // 绑定事件只执行一次监听器
   function once(eventName, callback) {
     const execCalllback = (...args) => {
       callback.call(null, ...args);
@@ -136,6 +137,7 @@ export function createEventEmitter() {
     return on(eventName, execCalllback);
   }
 
+  // 移除所有监听器 通过clear listeners map
   function removeAllListeners() {
     listeners.clear();
   }

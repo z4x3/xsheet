@@ -10,11 +10,11 @@ export default class Scrollbar {
       .on('mousemove.stop', () => {})
       .on('scroll.stop', (evt) => {
         const { scrollTop, scrollLeft } = evt.target;
-        // console.log('scrollTop:', scrollTop);
+        // logger('scrollTop:', scrollTop);
         if (this.moveFn) {
           this.moveFn(this.vertical ? scrollTop : scrollLeft, evt);
         }
-        // console.log('evt:::', evt);
+        // logger('evt:::', evt);
       });
   }
 
@@ -29,10 +29,10 @@ export default class Scrollbar {
 
   set(distance, contentDistance) {
     const d = distance - 1;
-    // console.log('distance:', distance, ', contentDistance:', contentDistance);
+    // logger('distance:', distance, ', contentDistance:', contentDistance);
     if (contentDistance > d) {
       const cssKey = this.vertical ? 'height' : 'width';
-      // console.log('d:', d);
+      // logger('d:', d);
       this.el.css(cssKey, `${d - 15}px`).show();
       this.contentEl
         .css(this.vertical ? 'width' : 'height', '1px')

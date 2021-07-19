@@ -1,6 +1,6 @@
 import { CellRange } from './cell_range';
 
-export default class Selector {
+export default class AssistSelector {
   constructor() {
     this.range = new CellRange(0, 0, 0, 0);
     this.ri = 0;

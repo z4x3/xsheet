@@ -60,6 +60,7 @@ class Rows {
     return this.sumHeight(0, this.len);
   }
 
+  // 根据行索引获取cell信息 { cells: { 0:{},1:{} } }
   get(ri) {
     return this._[ri];
   }
@@ -120,7 +121,7 @@ class Rows {
     const deci = dstCellRange.eci;
     const [rn, cn] = srcCellRange.size();
     const [drn, dcn] = dstCellRange.size();
-    // console.log(srcIndexes, dstIndexes);
+    // logger(srcIndexes, dstIndexes);
     let isAdd = true;
     let dn = 0;
     if (deri < sri || deci < sci) {
@@ -160,7 +161,7 @@ class Rows {
                     || (cn <= 1 && rn > 1 && (dsci > eci || deci < sci))
                     || (rn <= 1 && cn <= 1)) {
                     const result = /[\\.\d]+$/.exec(text);
-                    // console.log('result:', result);
+                    // logger('result:', result);
                     if (result !== null) {
                       const index = Number(result[0]) + n - 1;
                       ncell.text = text.substring(0, result.index) + index;
@@ -346,6 +347,7 @@ class Rows {
 
   getData() {
     const { len } = this;
+    logger('rows this._ >>>>>>>>',this._)
     return Object.assign({ len }, this._);
   }
 }

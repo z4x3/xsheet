@@ -7,16 +7,19 @@ import { cssPrefix } from './config';
 import { locale } from './locale/locale';
 import './index.less';
 
-
 class Spreadsheet {
   constructor(selectors, options = {}) {
     let targetEl = selectors;
     this.options = { showBottomBar: true, ...options };
-    this.sheetIndex = 1;
-    this.datas = [];
+    this.sheetIndex = 1;  //sheet序号
+    this.datas = []; //存放DataProxy实例 
+
     if (typeof selectors === 'string') {
       targetEl = document.querySelector(selectors);
     }
+
+    
+    // Bottombar类实例
     this.bottombar = this.options.showBottomBar ? new Bottombar(() => {
       const d = this.addSheet();
       this.sheet.resetData(d);
@@ -28,30 +31,35 @@ class Spreadsheet {
     }, (index, value) => {
       this.datas[index].name = value;
     }) : null;
-    this.data = this.addSheet();
-    const rootEl = h('div', `${cssPrefix}`)
-      .on('contextmenu', evt => evt.preventDefault());
+    
+    this.dataProxyFromSheet = this.addSheet();
+    
+    const rootEl = h('div', `${cssPrefix}`).on('contextmenu', evt => evt.preventDefault());
     // create canvas element
     targetEl.appendChild(rootEl.el);
-    this.sheet = new Sheet(rootEl, this.data);
+    
+    // Sheet类实例
+    this.sheet = new Sheet(rootEl, this.dataProxyFromSheet);
     if (this.bottombar !== null) {
       rootEl.child(this.bottombar.el);
     }
   }
 
   addSheet(name, active = true) {
-    const n = name || `sheet${this.sheetIndex}`;
-    const d = new DataProxy(n, this.options);
-    d.change = (...args) => {
+    // 为每个单独的工作表都建立了单独的 data 对象
+    const sheetName = name || `sheet${this.sheetIndex}`;
+    const data = new DataProxy(sheetName, this.options); // 数据驱动核心类 和数据有关的一切
+    data.change = (...args) => {
       this.sheet.trigger('change', ...args);
     };
-    this.datas.push(d);
-    // console.log('d:', n, d, this.datas);
+    this.datas.push(data);
+    logger('addSheet this.datas >>>>>>>',this.datas)
+    // logger('data:', sheetName, data, this.datas);
     if (this.bottombar !== null) {
-      this.bottombar.addItem(n, active);
+      this.bottombar.addItem(sheetName, active);
     }
     this.sheetIndex += 1;
-    return d;
+    return data;
   }
 
   deleteSheet() {
@@ -65,18 +73,20 @@ class Spreadsheet {
   }
 
   loadData(data) {
-    const ds = Array.isArray(data) ? data : [data];
+    // data为数组 数组长度即sheet的长度
+    const sheetsDataArr = Array.isArray(data) ? data : [data];
+    // 清空底边栏
     if (this.bottombar !== null) {
       this.bottombar.clear();
     }
     this.datas = [];
-    if (ds.length > 0) {
-      for (let i = 0; i < ds.length; i += 1) {
-        const it = ds[i];
-        const nd = this.addSheet(it.name, i === 0);
-        nd.setData(it);
+    if (sheetsDataArr.length > 0) {
+      for (let i = 0; i < sheetsDataArr.length; i += 1) {
+        const sheet = sheetsDataArr[i];
+        const sheetDataProxy = this.addSheet(sheet.name, i === 0);
+        sheetDataProxy.setData(sheet);
         if (i === 0) {
-          this.sheet.resetData(nd);
+          this.sheet.resetData(sheetDataProxy);
         }
       }
     }
@@ -88,6 +98,7 @@ class Spreadsheet {
   }
 
   cellText(ri, ci, text, sheetIndex = 0) {
+    // 调用dataProxy示例方法setCellText 设置表格内容
     this.datas[sheetIndex].setCellText(ri, ci, text, 'finished');
     return this;
   }
@@ -111,7 +122,7 @@ class Spreadsheet {
   }
 
   validate() {
-    const { validations } = this.data;
+    const { validations } = this.dataProxyFromSheet;
     return validations.errors.size <= 0;
   }
 

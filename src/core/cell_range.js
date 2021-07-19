@@ -1,6 +1,7 @@
 import { xy2expr, expr2xy } from './alphabet';
 
 class CellRange {
+  // sri：开始行坐标  sci：开始列坐标  eri：结束行坐标 eci：结束行坐标 
   constructor(sri, sci, eri, eci, w = 0, h = 0) {
     this.sri = sri;
     this.sci = sci;
@@ -25,14 +26,18 @@ class CellRange {
   // cell-ref: A10
   includes(...args) {
     let [ri, ci] = [0, 0];
+
+    // 解析两种不同的入参
     if (args.length === 1) {
       [ci, ri] = expr2xy(args[0]);
     } else if (args.length === 2) {
       [ri, ci] = args;
     }
+
     const {
       sri, sci, eri, eci,
     } = this;
+
     return sri <= ri && ri <= eri && sci <= ci && ci <= eci;
   }
 
@@ -73,23 +78,23 @@ class CellRange {
   }
 
   // intersects
-  intersects(other) {
-    return this.sri <= other.eri
-      && this.sci <= other.eci
-      && other.sri <= this.eri
-      && other.sci <= this.eci;
+  intersects(otherCr) {
+    return this.sri <= otherCr.eri
+      && this.sci <= otherCr.eci
+      && otherCr.sri <= this.eri
+      && otherCr.sci <= this.eci;
   }
 
   // union
-  union(other) {
+  union(otherCr) {
     const {
       sri, sci, eri, eci,
     } = this;
     return new CellRange(
-      other.sri < sri ? other.sri : sri,
-      other.sci < sci ? other.sci : sci,
-      other.eri > eri ? other.eri : eri,
-      other.eci > eci ? other.eci : eci,
+      otherCr.sri < sri ? otherCr.sri : sri,
+      otherCr.sci < sci ? otherCr.sci : sci,
+      otherCr.eri > eri ? otherCr.eri : eri,
+      otherCr.eci > eci ? otherCr.eci : eci,
     );
   }
 

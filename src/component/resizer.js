@@ -81,12 +81,12 @@ export default class Resizer {
       el, lineEl, cRect, vertical, minDistance,
     } = this;
     let distance = vertical ? cRect.width : cRect.height;
-    // console.log('distance:', distance);
+    // logger('distance:', distance);
     lineEl.show();
     mouseMoveUp(window, (e) => {
       this.moving = true;
       if (startEvt !== null && e.buttons === 1) {
-        // console.log('top:', top, ', left:', top, ', cRect:', cRect);
+        // logger('top:', top, ', left:', top, ', cRect:', cRect);
         if (vertical) {
           distance += e.movementX;
           if (distance > minDistance) {

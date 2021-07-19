@@ -162,6 +162,7 @@ export default class AutoFilter {
   }
 
   range() {
+    logger('this.ref >>>>>> ',this.ref)
     return CellRange.valueOf(this.ref);
   }
 

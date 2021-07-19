@@ -57,7 +57,7 @@ function keydownEventHandler(evt) {
 
 function inputEventHandler(evt) {
   const v = evt.target.value;
-  // console.log(evt, 'v:', v);
+  // logger(evt, 'v:', v);
   const { suggest, textlineEl, validator } = this;
   const { cell } = this;
   if (cell !== null) {
@@ -139,7 +139,7 @@ function suggestItemClick(it) {
       eit = '';
     }
     this.inputText = `${sit + it.key}(`;
-    // console.log('inputText:', this.inputText);
+    // logger('inputText:', this.inputText);
     position = this.inputText.length;
     this.inputText += `)${eit}`;
   }
@@ -168,7 +168,7 @@ export default class Editor {
     });
     this.datepicker = new Datepicker();
     this.datepicker.change((d) => {
-      // console.log('d:', d);
+      // logger('d:', d);
       this.setText(dateFormat(d));
       this.clear();
     });
@@ -225,7 +225,7 @@ export default class Editor {
       const {
         left, top, width, height, l, t,
       } = offset;
-      // console.log('left:', left, ',top:', top, ', freeze:', freeze);
+      // logger('left:', left, ',top:', top, ', freeze:', freeze);
       const elOffset = { left: 0, top: 0 };
       // top left
       if (freeze.w > l && freeze.h > t) {
@@ -249,7 +249,7 @@ export default class Editor {
   }
 
   setCell(cell, validator) {
-    // console.log('::', validator);
+    // logger('::', validator);
     const { el, datepicker, suggest } = this;
     el.show();
     this.cell = cell;
@@ -274,7 +274,7 @@ export default class Editor {
 
   setText(text) {
     this.inputText = text;
-    // console.log('text>>:', text);
+    // logger('text>>:', text);
     setText.call(this, text, text.length);
     resetTextareaSize.call(this);
   }

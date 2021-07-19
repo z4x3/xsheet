@@ -47,7 +47,7 @@ function scrollbarMove() {
     l, t, left, top, width, height,
   } = data.getSelectedRect();
   const tableOffset = this.getTableOffset();
-  // console.log(',l:', l, ', left:', left, ', tOffset.left:', tableOffset.width);
+  // logger(',l:', l, ', left:', left, ', tOffset.left:', tableOffset.width);
   if (Math.abs(left) + width > tableOffset.width) {
     horizontalScrollbar.move({ left: l + width - tableOffset.width });
   } else {
@@ -56,7 +56,7 @@ function scrollbarMove() {
       horizontalScrollbar.move({ left: l - 1 - fsw });
     }
   }
-  // console.log('top:', top, ', height:', height, ', tof.height:', tableOffset.height);
+  // logger('top:', top, ', height:', height, ', tof.height:', tableOffset.height);
   if (Math.abs(top) + height > tableOffset.height) {
     verticalScrollbar.move({ top: t + height - tableOffset.height - 1 });
   } else {
@@ -73,18 +73,25 @@ function selectorSet(multiple, ri, ci, indexesUpdated = true, moving = false) {
     table, selector, toolbar, data,
     contextMenu,
   } = this;
+
   contextMenu.setMode((ri === -1 || ci === -1) ? 'row-col' : 'range');
+
   const cell = data.getCell(ri, ci);
+
+  logger('selectorSet cell >>>>>', ri, ci,cell)
+  
   if (multiple) {
     selector.setEnd(ri, ci, moving);
-    this.trigger('cells-selected', cell, selector.range);
+    // trigger封装 eventMap.fire DI无关
+    // this.trigger('cells-selected', cell, selector.range);
   } else {
-    // trigger click event
+    // trigger click event DI无关
     selector.set(ri, ci, indexesUpdated);
-    this.trigger('cell-selected', cell, ri, ci);
+    // this.trigger('cell-selected', cell, ri, ci);
   }
   toolbar.reset();
-  table.render();
+  // DI无关
+  // table.render(); 
 }
 
 // multiple: boolean
@@ -99,7 +106,7 @@ function selectorMove(multiple, direction) {
   if (multiple) {
     [ri, ci] = selector.moveIndexes;
   }
-  // console.log('selector.move:', ri, ci);
+  // logger('selector.move:', ri, ci);
   if (direction === 'left') {
     if (ci > 0) ci -= 1;
   } else if (direction === 'right') {
@@ -128,7 +135,7 @@ function selectorMove(multiple, direction) {
 
 // private methods
 function overlayerMousemove(evt) {
-  // console.log('x:', evt.offsetX, ', y:', evt.offsetY);
+  // logger('x:', evt.offsetX, ', y:', evt.offsetY);
   if (evt.buttons !== 0) return;
   if (evt.target.className === `${cssPrefix}-resizer-hover`) return;
   const { offsetX, offsetY } = evt;
@@ -180,7 +187,7 @@ function overlayerMousescroll(evt) {
   const { verticalScrollbar, horizontalScrollbar, data } = this;
   const { top } = verticalScrollbar.scroll();
   const { left } = horizontalScrollbar.scroll();
-  // console.log('evt:::', evt.wheelDelta, evt.detail * 40);
+  // logger('evt:::', evt.wheelDelta, evt.detail * 40);
 
   const { rows, cols } = data;
 
@@ -195,7 +202,7 @@ function overlayerMousescroll(evt) {
     } while (v <= 0);
     return v;
   };
-  // console.log('deltaX', deltaX, 'evt.detail', evt.detail);
+  // logger('deltaX', deltaX, 'evt.detail', evt.detail);
   // if (evt.detail) deltaY = evt.detail * 40;
   const moveY = (vertical) => {
     if (vertical > 0) {
@@ -236,7 +243,7 @@ function overlayerMousescroll(evt) {
   const tempY = Math.abs(deltaY);
   const tempX = Math.abs(deltaX);
   const temp = Math.max(tempY, tempX);
-  // console.log('event:', evt);
+  // logger('event:', evt);
   // detail for windows/mac firefox vertical scroll
   if (/Firefox/i.test(window.navigator.userAgent)) throttle(moveY(evt.detail), 50);
   if (temp === tempX) throttle(moveX(deltaX), 50);
@@ -259,7 +266,7 @@ function verticalScrollbarSet() {
   const { data, verticalScrollbar } = this;
   const { height } = this.getTableOffset();
   const erth = data.exceptRowTotalHeight(0, -1);
-  // console.log('erth:', erth);
+  // logger('erth:', erth);
   verticalScrollbar.set(height, data.rows.totalHeight() - erth);
 }
 
@@ -365,19 +372,22 @@ function toolbarChangePaintformatPaste() {
 }
 
 function overlayerMousedown(evt) {
-  // console.log(':::::overlayer.mousedown:', evt.detail, evt.button, evt.buttons, evt.shiftKey);
-  // console.log('evt.target.className:', evt.target.className);
+  // logger(':::::overlayer.mousedown:', evt.detail, evt.button, evt.buttons, evt.shiftKey);
+  // logger('evt.target.className:', evt.target.className);
   const {
     selector, data, table, sortFilter,
   } = this;
   const { offsetX, offsetY } = evt;
   const isAutofillEl = evt.target.className === `${cssPrefix}-selector-corner`;
   const cellRect = data.getCellRectByXY(offsetX, offsetY);
-  const {
-    left, top, width, height,
+  logger('cellRect >>>>> ',cellRect)
+  logger('evt.target >>>>> ',evt.target)
+  // 当前鼠标落下选区的信息
+  let {
+    ri, ci ,left, top, width, height,
   } = cellRect;
-  let { ri, ci } = cellRect;
-  // sort or filter
+
+  //   // 过滤逻辑 == 忽略
   const { autoFilter } = data;
   if (autoFilter.includes(ri, ci)) {
     if (left + width - 20 < offsetX && top + height - 20 < offsetY) {
@@ -389,41 +399,45 @@ function overlayerMousedown(evt) {
     }
   }
 
-  // console.log('ri:', ri, ', ci:', ci);
   if (!evt.shiftKey) {
-    // console.log('selectorSetStart:::');
+    logger('selectorSetStart:::');
     if (isAutofillEl) {
       selector.showAutofill(ri, ci);
     } else {
+      // 设置当前鼠标点击的选区
       selectorSet.call(this, false, ri, ci);
     }
 
-    // mouse move up
+    // mouse move up  mouseMoveUp(target, movefunc, upfunc)
     mouseMoveUp(window, (e) => {
-      // console.log('mouseMoveUp::::');
+      // 获取鼠标当前的行列索引
       ({ ri, ci } = data.getCellRectByXY(e.offsetX, e.offsetY));
-      if (isAutofillEl) {
-        selector.showAutofill(ri, ci);
-      } else if (e.buttons === 1 && !e.shiftKey) {
+      logger('mouseMove >>>>', '行索引',ri, '列索引',ci);
+      // if (isAutofillEl) { // 过滤的元素 DI无关
+      //   selector.showAutofill(ri, ci);
+      // } 
+      if (e.buttons === 1 && !e.shiftKey) {
         selectorSet.call(this, true, ri, ci, true, true);
       }
     }, () => {
-      if (isAutofillEl && selector.arange && data.settings.mode !== 'read') {
-        if (data.autofill(selector.arange, 'all', msg => xtoast('Tip', msg))) {
-          table.render();
-        }
-      }
-      selector.hideAutofill();
-      toolbarChangePaintformatPaste.call(this);
+      // DI无关
+      // logger('mouseUp >>>>');
+      // if (isAutofillEl && selector.arange && data.settings.mode !== 'read') {
+      //   if (data.autofill(selector.arange, 'all', msg => xtoast('Tip', msg))) {
+      //     table.render();
+      //   }
+      // }
+      // selector.hideAutofill();
+      // toolbarChangePaintformatPaste.call(this);
     });
   }
-
-  if (!isAutofillEl && evt.buttons === 1) {
-    if (evt.shiftKey) {
-      // console.log('shiftKey::::');
-      selectorSet.call(this, true, ri, ci);
-    }
-  }
+  // DI无关
+  // if (!isAutofillEl && evt.buttons === 1) {
+  //   if (evt.shiftKey) {
+  //     // logger('shiftKey::::');
+  //     selectorSet.call(this, true, ri, ci);
+  //   }
+  // }
 }
 
 function editorSetOffset() {
@@ -431,7 +445,7 @@ function editorSetOffset() {
   const sOffset = data.getSelectedRect();
   const tOffset = this.getTableOffset();
   let sPosition = 'top';
-  // console.log('sOffset:', sOffset, ':', tOffset);
+  // logger('sOffset:', sOffset, ':', tOffset);
   if (sOffset.top > tOffset.height / 2) {
     sPosition = 'bottom';
   }
@@ -478,7 +492,7 @@ function colResizerFinished(cRect, distance) {
   const { ci } = cRect;
   const { table, selector, data } = this;
   data.cols.setWidth(ci, distance);
-  // console.log('data:', data);
+  // logger('data:', data);
   table.render();
   selector.resetAreaOffset();
   horizontalScrollbarSet.call(this);
@@ -565,7 +579,7 @@ function toolbarChange(type, value) {
 }
 
 function sortFilterChange(ci, order, operator, value) {
-  // console.log('sort:', sortDesc, operator, value);
+  // logger('sort:', sortDesc, operator, value);
   this.data.setAutoFilter(ci, order, operator, value);
   sheetReset.call(this);
 }
@@ -590,11 +604,14 @@ function sheetInitEvents() {
       overlayerMousemove.call(this, evt);
     })
     .on('mousedown', (evt) => {
+      // evt.detail Find out how many times the mouse was clicked in the same area
       editor.clear();
       contextMenu.hide();
+      logger('mousedown >>>>>> ',evt)
       // the left mouse button: mousedown → mouseup → click
       // the right mouse button: mousedown → contenxtmenu → mouseup
       if (evt.buttons === 2) {
+        // 次按键，通常指鼠标右键
         if (this.data.xyInSelectedRect(evt.offsetX, evt.offsetY)) {
           contextMenu.setPosition(evt.offsetX, evt.offsetY);
         } else {
@@ -603,6 +620,7 @@ function sheetInitEvents() {
         }
         evt.stopPropagation();
       } else if (evt.detail === 2) {
+        // 同区域双击
         editorSet.call(this);
       } else {
         overlayerMousedown.call(this, evt);
@@ -670,7 +688,7 @@ function sheetInitEvents() {
   };
   // contextmenu
   contextMenu.itemClick = (type) => {
-    // console.log('type:', type);
+    // logger('type:', type);
     if (type === 'validation') {
       modalValidation.setValue(this.data.getSelectedValidation());
     } else if (type === 'copy') {
@@ -695,6 +713,7 @@ function sheetInitEvents() {
   });
 
   bind(window, 'click', (evt) => {
+    logger('bindwindow >>>>',evt)
     this.focusing = overlayerEl.contains(evt.target);
   });
 
@@ -711,7 +730,7 @@ function sheetInitEvents() {
     const {
       key, ctrlKey, shiftKey, metaKey,
     } = evt;
-    // console.log('keydown.evt: ', keyCode);
+    // logger('keydown.evt: ', keyCode);
     if (ctrlKey || metaKey) {
       // const { sIndexes, eIndexes } = selector;
       // let what = 'all';
@@ -785,7 +804,7 @@ function sheetInitEvents() {
           break;
       }
     } else {
-      // console.log('evt.keyCode:', evt.keyCode);
+      // logger('evt.keyCode:', evt.keyCode);
       switch (keyCode) {
         case 32:
           if (shiftKey) {
@@ -870,13 +889,12 @@ export default class Sheet {
     // scrollbar
     this.verticalScrollbar = new Scrollbar(true);
     this.horizontalScrollbar = new Scrollbar(false);
-    // editor
+    // Editor 类
     this.editor = new Editor(
       formulas,
       () => this.getTableOffset(),
       data.rows.height,
-    );
-    // data validation
+    ); // data validation
     this.modalValidation = new ModalValidation();
     // contextMenu
     this.contextMenu = new ContextMenu(() => this.getRect(), !showContextmenu);
@@ -903,7 +921,7 @@ export default class Sheet {
       this.modalValidation.el,
       this.sortFilter.el,
     );
-    // table
+    // Table 类
     this.table = new Table(this.tableEl.el, data);
     sheetInitEvents.call(this);
     sheetReset.call(this);

@@ -67,7 +67,7 @@ export default class SortFilter {
   }
 
   itemClick(it) {
-    // console.log('it:', it);
+    // logger('it:', it);
     this.sort = it;
     const { sortAscEl, sortDescEl } = this;
     sortAscEl.checked(it === 'asc');
@@ -75,7 +75,7 @@ export default class SortFilter {
   }
 
   filterClick(index, it) {
-    // console.log('index:', index, it);
+    // logger('index:', index, it);
     const { filterbEl, filterValues, values } = this;
     const children = filterbEl.children();
     if (it === 'all') {

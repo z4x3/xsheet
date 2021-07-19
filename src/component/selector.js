@@ -5,7 +5,7 @@ import { CellRange } from '../core/cell_range';
 const selectorHeightBorderWidth = 2 * 2 - 1;
 let startZIndex = 10;
 
-class SelectorElement {
+class SelectorElement { 
   constructor(useHideInput = false) {
     this.useHideInput = useHideInput;
     this.inputChange = () => {};
@@ -18,6 +18,7 @@ class SelectorElement {
       .css('z-index', `${startZIndex}`)
       .children(this.areaEl, this.clipboardEl, this.autofillEl)
       .hide();
+
     if (useHideInput) {
       this.hideInput = h('input', '')
         .on('compositionend', (evt) => {
@@ -26,6 +27,7 @@ class SelectorElement {
       this.el.child(this.hideInputDiv = h('div', 'hide-input').child(this.hideInput));
       this.el.child(this.hideInputDiv = h('div', 'hide-input').child(this.hideInput));
     }
+
     startZIndex += 1;
   }
 
@@ -39,7 +41,7 @@ class SelectorElement {
     return this;
   }
 
-  setAreaOffset(v) {
+  setAreaOffset(v,name) {
     const {
       left, top, width, height,
     } = v;
@@ -49,11 +51,14 @@ class SelectorElement {
       left: left - 0.8,
       top: top - 0.8,
     };
+    logger('setAreaOffset >>>> name', name)
+    // 高亮显示选区的区域
     this.areaEl.offset(of).show();
-    if (this.useHideInput) {
-      this.hideInputDiv.offset(of);
-      this.hideInput.val('').focus();
-    }
+    // DI无关
+    // if (this.useHideInput) {
+    //   this.hideInputDiv.offset(of);
+    //   this.hideInput.val('').focus();
+    // }
   }
 
   setClipboardOffset(v) {
@@ -140,50 +145,52 @@ function calLAreaOffset(offset) {
 }
 
 function setBRAreaOffset(offset) {
+  // calBRAreaOffset 计算冻结栏 DI无关
   const { br } = this;
-  br.setAreaOffset(calBRAreaOffset.call(this, offset));
+  br.setAreaOffset(calBRAreaOffset.call(this, offset),'BR-AreaOffset');
 }
 
 function setTLAreaOffset(offset) {
   const { tl } = this;
-  tl.setAreaOffset(offset);
+  tl.setAreaOffset(offset,'TL-AreaOffset');
 }
 
 function setTAreaOffset(offset) {
   const { t } = this;
-  t.setAreaOffset(calTAreaOffset.call(this, offset));
+  t.setAreaOffset(calTAreaOffset.call(this, offset),'T-AreaOffset');
 }
 
 function setLAreaOffset(offset) {
   const { l } = this;
-  l.setAreaOffset(calLAreaOffset.call(this, offset));
+  l.setAreaOffset(calLAreaOffset.call(this, offset),'L-AreaOffset');
 }
 
 function setLClipboardOffset(offset) {
   const { l } = this;
-  l.setClipboardOffset(calLAreaOffset.call(this, offset));
+  l.setClipboardOffset(calLAreaOffset.call(this, offset),'L-ClipboardOffset');
 }
 
 function setBRClipboardOffset(offset) {
   const { br } = this;
-  br.setClipboardOffset(calBRAreaOffset.call(this, offset));
+  br.setClipboardOffset(calBRAreaOffset.call(this, offset),'BR-ClipboardOffset');
 }
 
 function setTLClipboardOffset(offset) {
   const { tl } = this;
-  tl.setClipboardOffset(offset);
+  tl.setClipboardOffset(offset,'TL-ClipboardOffset');
 }
 
 function setTClipboardOffset(offset) {
   const { t } = this;
-  t.setClipboardOffset(calTAreaOffset.call(this, offset));
+  t.setClipboardOffset(calTAreaOffset.call(this, offset),'T-ClipboardOffset');
 }
-
+ 
 function setAllAreaOffset(offset) {
+  logger('setAllAreaOffset >>>> offset ',offset)
   setBRAreaOffset.call(this, offset);
-  setTLAreaOffset.call(this, offset);
-  setTAreaOffset.call(this, offset);
-  setLAreaOffset.call(this, offset);
+  // setTLAreaOffset.call(this, offset);
+  // setTAreaOffset.call(this, offset);
+  // setLAreaOffset.call(this, offset);
 }
 
 function setAllClipboardOffset(offset) {
@@ -257,9 +264,10 @@ export default class Selector {
   resetAreaOffset() {
     // console.log('offset:', offset);
     const offset = this.data.getSelectedRect();
-    const coffset = this.data.getClipboardRect();
+    // const coffset = this.data.getClipboardRect();
+    // logger('offset,coffset >>>>>> ',offset,coffset)
     setAllAreaOffset.call(this, offset);
-    setAllClipboardOffset.call(this, coffset);
+    // setAllClipboardOffset.call(this, coffset);
     this.resetOffset();
   }
 
@@ -286,6 +294,8 @@ export default class Selector {
   set(ri, ci, indexesUpdated = true) {
     const { data } = this;
     const cellRange = data.calSelectedRangeByStart(ri, ci);
+    logger('selector set cellRange >>>> ', cellRange)
+    // 起始行列索引
     const { sri, sci } = cellRange;
     if (indexesUpdated) {
       let [cri, cci] = [ri, ci];
@@ -298,20 +308,28 @@ export default class Selector {
     this.moveIndexes = [sri, sci];
     // this.sIndexes = sIndexes;
     // this.eIndexes = eIndexes;
+    // 设置初始选区 用作选区拖拽的起始位置
     this.range = cellRange;
+    // 重置选区位置
     this.resetAreaOffset();
+    // logger('selector this.el',this.el)
     this.el.show();
   }
 
   setEnd(ri, ci, moving = true) {
     const { data, lastri, lastci } = this;
     if (moving) {
+      // 当前单元格内反复移动取消计算
       if (ri === lastri && ci === lastci) return;
       this.lastri = ri;
       this.lastci = ci;
     }
+    //  data.calSelectedRangeByEnd  通过结束坐标计算选区范围，返回起始和终点的行列索引
     this.range = data.calSelectedRangeByEnd(ri, ci);
-    setAllAreaOffset.call(this, this.data.getSelectedRect());
+    logger('setEnd >>>>> ri, ci, range, data.getSelectedRect', ri, ci, this.range, data.getSelectedRect())
+    // 高亮选中的矩形区域   
+    // data.getSelectedRect ，返回选择区域描述：区域宽高、区域左上角坐标位置
+    setAllAreaOffset.call(this, data.getSelectedRect());
   }
 
   reset() {

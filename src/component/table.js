@@ -37,7 +37,7 @@ function renderCellBorders(bboxes, translateFunc) {
   const { draw } = this;
   if (bboxes) {
     const rset = new Set();
-    // console.log('bboxes:', bboxes);
+    // logger('bboxes:', bboxes);
     bboxes.forEach(({ ri, ci, box }) => {
       if (!rset.has(ri)) {
         rset.add(ri);
@@ -81,12 +81,12 @@ export function renderCell(draw, data, rindex, cindex, yoffset = 0) {
       cellText = cell.text || '';
     }
     if (style.format) {
-      // console.log(data.formatm, '>>', cell.format);
+      // logger(data.formatm, '>>', cell.format);
       cellText = formatm[style.format].render(cellText);
     }
     const font = Object.assign({}, style.font);
     font.size = getFontSizePxByPt(font.size);
-    // console.log('style:', style);
+    // logger('style:', style);
     draw.text(cellText, dbox, {
       align: style.align,
       valign: style.valign,
@@ -98,7 +98,7 @@ export function renderCell(draw, data, rindex, cindex, yoffset = 0) {
     // error
     const error = data.validations.getError(rindex, cindex);
     if (error) {
-      // console.log('error:', rindex, cindex, error);
+      // logger('error:', rindex, cindex, error);
       draw.error(dbox);
     }
     if (frozen) {
@@ -200,7 +200,7 @@ function renderFixedHeaders(type, viewRange, w, h, tx, ty) {
   const {
     sri, sci, eri, eci,
   } = data.selector.range;
-  // console.log(data.selectIndexes);
+  // logger(data.selectIndexes);
   // draw text
   // text font, align...
   draw.attr(tableFixedHeaderStyle());
@@ -267,15 +267,15 @@ function renderContentGrid({
     .translate(fw + tx, fh + ty);
   // const sumWidth = cols.sumWidth(sci, eci + 1);
   // const sumHeight = rows.sumHeight(sri, eri + 1);
-  // console.log('sumWidth:', sumWidth);
+  // logger('sumWidth:', sumWidth);
   // draw.clearRect(0, 0, w, h);
   if (!settings.showGrid) {
     draw.restore();
     return;
   }
-  // console.log('rowStart:', rowStart, ', rowLen:', rowLen);
+  // logger('rowStart:', rowStart, ', rowLen:', rowLen);
   data.rowEach(sri, eri, (i, y, ch) => {
-    // console.log('y:', y);
+    // logger('y:', y);
     if (i !== sri) draw.line([0, y], [w, y]);
     if (i === eri) draw.line([0, y + ch], [w, y + ch]);
   });
